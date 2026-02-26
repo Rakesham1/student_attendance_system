@@ -1,0 +1,278 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}My Attendance - AttendX{% endblock %}
+{% block page_title %}My Attendance{% endblock %}
+
+{% block extra_css %}
+<style>
+    .student-info-card {
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.15), rgba(6, 182, 212, 0.1));
+        border: 1px solid rgba(79, 70, 229, 0.25);
+        border-radius: 16px;
+        padding: 24px;
+    }
+
+    .student-info-card .info-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 28px;
+        align-items: center;
+    }
+
+    .student-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 24px;
+        color: #fff;
+        flex-shrink: 0;
+    }
+
+    .info-item .info-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted-custom);
+        margin-bottom: 2px;
+    }
+
+    .info-item .info-value {
+        font-size: 15px;
+        font-weight: 600;
+        color: #e2e8f0;
+    }
+
+    .overall-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        text-align: center;
+    }
+
+    .overall-percentage {
+        font-size: 56px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1.1;
+    }
+
+    .overall-subtitle {
+        font-size: 13px;
+        color: var(--text-muted-custom);
+        margin-top: 4px;
+    }
+
+    .overall-stats {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        margin-top: 16px;
+    }
+
+    .overall-stats .stat-item .stat-num {
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .overall-stats .stat-item .stat-lbl {
+        font-size: 12px;
+        color: var(--text-muted-custom);
+    }
+
+    .subject-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 0;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.15s;
+    }
+
+    .subject-row:last-child {
+        border-bottom: none;
+    }
+
+    .subject-row:hover {
+        background: rgba(255, 255, 255, 0.02);
+        margin: 0 -20px;
+        padding: 16px 20px;
+        border-radius: 10px;
+    }
+
+    .subject-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .subject-name {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .subject-code {
+        font-size: 12px;
+        color: var(--text-muted-custom);
+    }
+
+    .subject-progress {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .pct-text {
+        font-size: 14px;
+        font-weight: 700;
+        min-width: 52px;
+        text-align: right;
+    }
+
+    .pct-good {
+        color: #34d399;
+    }
+
+    .pct-warn {
+        color: #fbbf24;
+    }
+
+    .pct-danger {
+        color: #f87171;
+    }
+
+    .view-link {
+        font-size: 13px;
+        color: #a5b4fc;
+        text-decoration: none;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: color 0.2s;
+    }
+
+    .view-link:hover {
+        color: #c7d2fe;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-muted-custom);
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Student Info -->
+<div class="student-info-card mb-4">
+    <div class="info-row">
+        <div class="student-avatar">
+            {{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}
+        </div>
+        <div class="info-item">
+            <div class="info-label">Name</div>
+            <div class="info-value">{{ student.user.get_full_name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Roll Number</div>
+            <div class="info-value">{{ student.roll_number }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Department</div>
+            <div class="info-value">{{ student.department.name }}</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">Semester</div>
+            <div class="info-value">{{ student.semester }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Overall Attendance -->
+    <div class="col-md-4">
+        <div class="overall-card h-100">
+            <div class="overall-percentage">{{ overall_percentage }}%</div>
+            <div class="overall-subtitle">Overall Attendance</div>
+            <div class="overall-stats">
+                <div class="stat-item">
+                    <div class="stat-num" style="color:#34d399;">{{ overall_present }}</div>
+                    <div class="stat-lbl">Present</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num" style="color:#f87171;">{{ overall_absent }}</div>
+                    <div class="stat-lbl">Absent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num" style="color:#a5b4fc;">{{ overall_total }}</div>
+                    <div class="stat-lbl">Total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subject-wise Attendance -->
+    <div class="col-md-8">
+        <div class="card-custom h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-book" style="color:var(--primary);"></i> Subject-wise Attendance
+            </div>
+            <div class="card-body">
+                {% if subject_data %}
+                {% for item in subject_data %}
+                <div class="subject-row">
+                    <div class="subject-icon" style="background: rgba(79,70,229,0.15); color: #a5b4fc;">
+                        <i class="bi bi-journal-text"></i>
+                    </div>
+                    <div>
+                        <div class="subject-name">{{ item.subject.name }}</div>
+                        <div class="subject-code">{{ item.subject.code }} &middot; {{ item.present }}/{{ item.total }}
+                            classes</div>
+                    </div>
+                    <div class="subject-progress">
+                        <div class="progress-custom">
+                            <div class="progress-bar-custom {% if item.percentage < 75 %}progress-bar-danger{% endif %}"
+                                style="width: {{ item.percentage }}%"></div>
+                        </div>
+                    </div>
+                    <div
+                        class="pct-text {% if item.percentage >= 75 %}pct-good{% elif item.percentage >= 50 %}pct-warn{% else %}pct-danger{% endif %}">
+                        {{ item.percentage }}%
+                    </div>
+                    <a href="{% url 'student_detail' item.subject.pk %}" class="view-link">
+                        Details <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>No attendance records yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

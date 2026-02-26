@@ -1,0 +1,129 @@
+﻿{% extends 'attendance/base.html' %}
+{% block title %}Mark Attendance | AttendX{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<!-- Select Subject & Date -->
+<div class="card-custom mb-4">
+    <div class="card-header"><i class="bi bi-funnel me-2" style="color:#818cf8;"></i>Select Subject & Date</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label">Subject</label>
+                {{ form.subject }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Date</label>
+                {{ form.date }}
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary-custom w-100">
+                    <i class="bi bi-search me-1"></i>Load Students
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_subject and selected_date %}
+{% if already_marked %}
+<div class="alert alert-warning d-flex align-items-center gap-2"
+    style="background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.3);">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    Attendance for <strong>{{ selected_subject.name }}</strong> on <strong>{{ selected_date }}</strong> is already
+    marked. Submitting will update it.
+</div>
+{% endif %}
+
+{% if students %}
+<div class="card-custom">
+    <div class="card-header d-flex justify-content-between">
+        <span><i class="bi bi-people me-2" style="color:#34d399;"></i>Students â€” {{ selected_subject.name }} | {{ selected_date }}</span>
+        <span style="color:#94a3b8;font-size:13px;">{{ students.count }} students</span>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="subject_id" value="{{ selected_subject.pk }}">
+            <input type="hidden" name="date" value="{{ selected_date }}">
+
+            <!-- Select All Controls -->
+            <div class="d-flex gap-2 mb-3">
+                <button type="button" class="btn btn-sm"
+                    style="background:rgba(16,185,129,0.1);color:#34d399;border:1px solid rgba(16,185,129,0.3);"
+                    onclick="selectAll(true)">
+                    <i class="bi bi-check-all me-1"></i>Mark All Present
+                </button>
+                <button type="button" class="btn btn-sm"
+                    style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);"
+                    onclick="selectAll(false)">
+                    <i class="bi bi-x-circle me-1"></i>Mark All Absent
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Roll No.</th>
+                            <th>Name</th>
+                            <th class="text-center">Present</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr id="row-{{ student.pk }}">
+                            <td style="color:#64748b;">{{ forloop.counter }}</td>
+                            <td><span style="color:#a5b4fc;font-weight:600;">{{ student.roll_number }}</span></td>
+                            <td>{{ student.user.get_full_name }}</td>
+                            <td class="text-center">
+                                <input type="hidden" name="student_ids" value="{{ student.pk }}">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                    <input class="form-check-input attendance-check" type="checkbox"
+                                        name="present_students" value="{{ student.pk }}" id="att_{{ student.pk }}"
+                                        onchange="updateRow({{ student.pk }}, this.checked)"
+                                        style="width:44px;height:22px;cursor:pointer;">
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-primary-custom px-5">
+                    <i class="bi bi-save me-2"></i>Save Attendance
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="alert" style="background:rgba(245,158,11,0.1);color:#fbbf24;border:1px solid rgba(245,158,11,0.3);">
+    <i class="bi bi-info-circle me-2"></i>No students found for this subject's department and semester.
+</div>
+{% endif %}
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectAll(present) {
+        document.querySelectorAll('.attendance-check').forEach(cb => {
+            cb.checked = present;
+            updateRow(cb.value, present);
+        });
+    }
+    function updateRow(id, isPresent) {
+        const row = document.getElementById('row-' + id);
+        if (isPresent) {
+            row.style.background = 'rgba(16,185,129,0.06)';
+        } else {
+            row.style.background = '';
+        }
+    }
+</script>
+{% endblock %}

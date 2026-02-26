@@ -1,0 +1,73 @@
+﻿{% extends 'attendance/base.html' %}
+{% block title %}Manage Teachers | AttendX{% endblock %}
+{% block page_title %}Manage Teachers{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Add Teacher Form -->
+    <div class="col-lg-4">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-person-plus me-2" style="color:#22d3ee;"></i>Add New Teacher</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3"><label class="form-label">First Name</label>{{ form.first_name }}</div>
+                    <div class="mb-3"><label class="form-label">Last Name</label>{{ form.last_name }}</div>
+                    <div class="mb-3"><label class="form-label">Email</label>{{ form.email }}</div>
+                    <div class="mb-3"><label class="form-label">Phone</label>{{ form.phone }}</div>
+                    <div class="mb-3"><label class="form-label">Username</label>{{ form.username }}</div>
+                    <div class="mb-3"><label class="form-label">Password</label>{{ form.password }}</div>
+                    <button type="submit" class="btn w-100"
+                        style="background:linear-gradient(135deg,#06b6d4,#0284c7);color:#fff;border:none;border-radius:10px;padding:10px;font-weight:600;">
+                        <i class="bi bi-plus-circle me-2"></i>Add Teacher
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teachers Table -->
+    <div class="col-lg-8">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-person-workspace me-2" style="color:#22d3ee;"></i>All Teachers ({{ teachers.count }})</div>
+            <div class="card-body p-0">
+                {% if teachers %}
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for teacher in teachers %}
+                        <tr>
+                            <td><span style="color:#22d3ee;font-weight:500;">{{ teacher.get_full_name }}</span></td>
+                            <td style="color:#64748b;">{{ teacher.username }}</td>
+                            <td>{{ teacher.email }}</td>
+                            <td>{{ teacher.phone|default:"â€”" }}</td>
+                            <td>
+                                <a href="{% url 'delete_teacher' teacher.pk %}" class="btn btn-sm"
+                                    style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);"
+                                    onclick="return confirm('Delete this teacher?')">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5" style="color:#64748b;">
+                    <i class="bi bi-person-workspace" style="font-size:48px;"></i>
+                    <p class="mt-3">No teachers added yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

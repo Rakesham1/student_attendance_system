@@ -1,0 +1,198 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}{{ subject.name }} Attendance - AttendX{% endblock %}
+{% block page_title %}{{ subject.name }} — Attendance Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .summary-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+
+    .summary-item:hover {
+        transform: translateY(-2px);
+    }
+
+    .summary-item .s-value {
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .summary-item .s-label {
+        font-size: 12px;
+        color: var(--text-muted-custom);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 4px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #a5b4fc;
+        text-decoration: none;
+        margin-bottom: 20px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover {
+        color: #c7d2fe;
+    }
+
+    .subject-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .subject-header-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(79, 70, 229, 0.2), rgba(6, 182, 212, 0.15));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #a5b4fc;
+        flex-shrink: 0;
+    }
+
+    .subject-header-info h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 20px;
+    }
+
+    .subject-header-info span {
+        font-size: 13px;
+        color: var(--text-muted-custom);
+    }
+
+    .attendance-pct-lg {
+        font-size: 48px;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 20px;
+        color: var(--text-muted-custom);
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 12px;
+        display: block;
+        opacity: 0.4;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="{% url 'student_dashboard' %}" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+</a>
+
+<!-- Subject Header -->
+<div class="subject-header">
+    <div class="subject-header-icon"><i class="bi bi-journal-text"></i></div>
+    <div class="subject-header-info">
+        <h5>{{ subject.name }}</h5>
+        <span>{{ subject.code }} &middot; Semester {{ subject.semester }} &middot; {{ subject.department.name }}</span>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-grid">
+    <div class="summary-item">
+        <div class="s-value attendance-pct-lg" style="font-size:34px;">{{ percentage }}%</div>
+        <div class="s-label">Attendance</div>
+    </div>
+    <div class="summary-item">
+        <div class="s-value" style="color:#a5b4fc;">{{ total }}</div>
+        <div class="s-label">Total Classes</div>
+    </div>
+    <div class="summary-item">
+        <div class="s-value" style="color:#34d399;">{{ present }}</div>
+        <div class="s-label">Present</div>
+    </div>
+    <div class="summary-item">
+        <div class="s-value" style="color:#f87171;">{{ absent }}</div>
+        <div class="s-label">Absent</div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="mb-4">
+    <div class="progress-custom" style="height: 12px;">
+        <div class="progress-bar-custom {% if percentage < 75 %}progress-bar-danger{% endif %}"
+            style="width: {{ percentage }}%"></div>
+    </div>
+</div>
+
+<!-- Records Table -->
+<div class="card-custom">
+    <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-calendar3" style="color:var(--primary);"></i> Date-wise Records
+    </div>
+    <div class="card-body p-0">
+        {% if records %}
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ record.session.date|date:"M d, Y" }}</td>
+                    <td>{{ record.session.date|date:"l" }}</td>
+                    <td>
+                        {% if record.status == 'PRESENT' %}
+                        <span class="badge badge-present px-3 py-1"><i class="bi bi-check-circle-fill me-1"></i>
+                            Present</span>
+                        {% else %}
+                        <span class="badge badge-absent px-3 py-1"><i class="bi bi-x-circle-fill me-1"></i>
+                            Absent</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-calendar-x"></i>
+            <p>No attendance records found for this subject.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+﻿{% extends 'attendance/base.html' %}
+{% block title %}Attendance Report | AttendX{% endblock %}
+{% block page_title %}Attendance Reports{% endblock %}
+
+{% block content %}
+<div class="card-custom mb-4">
+    <div class="card-header"><i class="bi bi-filter me-2" style="color:#818cf8;"></i>Filter by Subject</div>
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label">Select Subject</label>
+                <select name="subject" class="form-select">
+                    <option value="">-- Choose Subject --</option>
+                    {% for sub in subjects %}
+                    <option value="{{ sub.pk }}" {% if selected_subject and selected_subject.pk == sub.pk %}selected{% endif %}>{{ sub.code }} - {{ sub.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary-custom w-100"><i class="bi bi-search me-1"></i>View
+                    Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_subject %}
+{% if sessions %}
+{% for session in sessions %}
+<div class="card-custom mb-3">
+    <div class="card-header d-flex justify-content-between">
+        <span><i class="bi bi-calendar-event me-2" style="color:#22d3ee;"></i>{{ session.date }}</span>
+        <span style="color:#94a3b8;font-size:13px;">
+            Present: {{ session.records.all|length }} students
+        </span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-custom mb-0">
+            <thead>
+                <tr>
+                    <th>Roll No.</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in session.records.all %}
+                <tr>
+                    <td style="color:#a5b4fc;font-weight:600;">{{ record.student.roll_number }}</td>
+                    <td>{{ record.student.user.get_full_name }}</td>
+                    <td>
+                        {% if record.status == 'PRESENT' %}
+                        <span class="badge badge-present px-3 py-1">âœ“ Present</span>
+                        {% else %}
+                        <span class="badge badge-absent px-3 py-1">âœ— Absent</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5" style="color:#64748b;">
+    <i class="bi bi-graph-up" style="font-size:48px;"></i>
+    <p class="mt-3">No sessions recorded for this subject yet.</p>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+

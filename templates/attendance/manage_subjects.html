@@ -1,0 +1,71 @@
+﻿{% extends 'attendance/base.html' %}
+{% block title %}Manage Subjects | AttendX{% endblock %}
+{% block page_title %}Manage Subjects{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-book me-2" style="color:#34d399;"></i>Add Subject</div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3"><label class="form-label">Subject Name</label>{{ form.name }}</div>
+                    <div class="mb-3"><label class="form-label">Subject Code</label>{{ form.code }}</div>
+                    <div class="mb-3"><label class="form-label">Department</label>{{ form.department }}</div>
+                    <div class="mb-3"><label class="form-label">Assign Teacher</label>{{ form.teacher }}</div>
+                    <div class="mb-3"><label class="form-label">Semester</label>{{ form.semester }}</div>
+                    <button type="submit" class="btn w-100"
+                        style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:10px;padding:10px;font-weight:600;">
+                        <i class="bi bi-plus-circle me-2"></i>Add Subject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card-custom">
+            <div class="card-header"><i class="bi bi-book me-2" style="color:#34d399;"></i>All Subjects ({{ subjects.count }})</div>
+            <div class="card-body p-0">
+                {% if subjects %}
+                <table class="table table-custom mb-0">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Teacher</th>
+                            <th>Sem</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in subjects %}
+                        <tr>
+                            <td><span style="color:#34d399;font-weight:600;">{{ sub.code }}</span></td>
+                            <td>{{ sub.name }}</td>
+                            <td><span class="badge" style="background:rgba(245,158,11,0.15);color:#fbbf24;">{{ sub.department.code }}</span></td>
+                            <td>{{ sub.teacher.get_full_name|default:"Unassigned" }}</td>
+                            <td>{{ sub.semester }}</td>
+                            <td>
+                                <a href="{% url 'delete_subject' sub.pk %}" class="btn btn-sm"
+                                    style="background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3);"
+                                    onclick="return confirm('Delete subject?')">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5" style="color:#64748b;">
+                    <i class="bi bi-book" style="font-size:48px;"></i>
+                    <p class="mt-3">No subjects yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
